@@ -37,7 +37,6 @@ class Mecung
 {
 	int n, m;
 	int A[100][100];
-	int d;
 
 public:
 	void Mecung::Path()
@@ -51,10 +50,7 @@ public:
 		x[1] = s;
 		A[s.H][s.C] = 1;
 		TRY(x, 1, f);
-		/*
-		if (d == 0) cout << "Khong co duong di";
-		else cout << "\nCo so duong di la " << d;
-		*/
+
 		delete [] x;
 		x = 0;
 	}
@@ -85,12 +81,10 @@ public:
 		cout << "\n";
 		FOR(i, 1, k)
 		{
-			//cout << "(" << x[i].H << "," << x[i].C << ")->";
 			way[demWay][0] = x[i].H;
 			way[demWay][1] = x[i].C;
 			demWay++;
 		}
-		//cout << "\b\b  ";
 		d++;
 	}
 
@@ -140,7 +134,6 @@ int main()
 {
 	fixConsoleWindow();	// co dinh console
 	SetWindow(105, 50); // kich co console
-	//xep_hang();
 	menu();
 }
 
@@ -448,10 +441,6 @@ void showInfo(int level)
 	gotoxy(87, 10);
 
 	cout << "THOI GIAN DA QUA";
-
-
-
-
 
 	gotoxy(89, 14);
 	cout << "SO BUOC DA DI";
