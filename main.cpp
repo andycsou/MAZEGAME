@@ -42,7 +42,6 @@ public:
 	void Mecung::Path()
 	{
 		Toado s, f;
-		d = 0;
 		s.H = s.C = 2;
 		f.C = GRID_WIDTH - 1;
 		f.H = GRID_HEIGHT - 1;
@@ -85,7 +84,6 @@ public:
 			way[demWay][1] = x[i].C;
 			demWay++;
 		}
-		d++;
 	}
 
 	void Mecung::LoadFile(char *fn)
