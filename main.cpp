@@ -20,15 +20,19 @@
 using namespace std;
 
 int way[1000][2]; // mảng 2 chiều chứa các bước giải mê cung
-int demWay = 0; // số bước chân để giải mê cung
+int way_user[1000][2]; // ... of user;
+int demWay = 0; // số bước chân để giải mê cung tối ưu
 int user_step = 0; // số bước chân của người chơi
 int GRID_WIDTH; // chieu rong me cung
 int GRID_HEIGHT; // chieu cao me cung
 
 bool maze[35 * 77]; // 35 x 77 la maxsize
 bool maze2D[35][77];
+int step; // the same with demWay num
+int ways = 0;
 
 clock_t start;
+
 double temp_time, final_time;
 
 int capdo = 0; // bien level nhung la bien toan cuc
@@ -36,11 +40,13 @@ int capdo = 0; // bien level nhung la bien toan cuc
 class Mecung
 {
 	int n, m;
-	int A[100][100];
-
+	int A[100][100];	
 public:
-	void Mecung::Path()
+
+	void Path()
 	{
+		step = INT_MAX;
+		ways = 0;
 		Toado s, f;
 		s.H = s.C = 2;
 		f.C = GRID_WIDTH - 1;
@@ -49,12 +55,11 @@ public:
 		x[1] = s;
 		A[s.H][s.C] = 1;
 		TRY(x, 1, f);
-
 		delete [] x;
 		x = 0;
 	}
 
-	void Mecung::TRY(Toado *x, int k, Toado f)
+	void TRY(Toado *x, int k, Toado f)
 	{
 		int hh[4] = { 0, -1,  0,  1 };
 		int hc[4] = { 1,  0, -1,  0 };
@@ -75,18 +80,23 @@ public:
 		}
 	}
 
-	void Mecung::Print(Toado *x, int k)
+	void Print(Toado *x, int k)
 	{
-		cout << "\n";
-		FOR(i, 1, k)
-		{
-			way[demWay][0] = x[i].H;
-			way[demWay][1] = x[i].C;
-			demWay++;
+		ways++; // số cách giải
+		if (step > k) // +inf > bước đi
+		{	
+			demWay = 0;
+			FOR(i, 1, k)
+			{
+				way[i][0] = x[i].H;
+				way[i][1] = x[i].C;
+				demWay++;
+			}
+			step = k;
 		}
 	}
 
-	void Mecung::LoadFile(char *fn)
+	void LoadFile(char *fn)
 	{
 		ifstream f(fn);
 		f >> n >> m;
@@ -127,6 +137,7 @@ void loser();
 void huong_dan();
 void saveGame();
 void xep_hang(int c);
+void ducMaze(int level);
 
 int main()
 {
@@ -135,6 +146,83 @@ int main()
 	menu();
 }
 
+void ducMaze(int level)
+{
+	short GRID_HEIGHT, GRID_WIDTH;
+	short x = 0, y = 0;
+
+	if (level == 1)
+	{
+		GRID_WIDTH = 25;
+		GRID_HEIGHT = 13;
+	}
+	if (level == 2)
+	{
+		GRID_WIDTH = 51;
+		GRID_HEIGHT = 23;
+	}
+	if (level == 3)
+	{
+		GRID_WIDTH = 77;
+		GRID_HEIGHT = 35;
+	}
+
+	switch (level)
+	{
+		case 1:
+			{
+				FOR(i,0,10)
+				{
+					while (1)
+					{
+						x = rand() % (GRID_WIDTH - 1);
+						y = rand() % (GRID_HEIGHT - 1);
+						if (maze[XYToIndex(x,y)] && x != 0 && y != 0 && x != GRID_WIDTH - 1 && y != GRID_HEIGHT - 1)
+						{
+							maze[XYToIndex(x,y)] = 0;
+							break;
+						}
+					}		
+				}
+				break;
+			}
+		case 2:
+			{
+				FOR(i,0,15)
+				{
+					while (1)
+					{
+						x = rand() % (GRID_WIDTH - 1);
+						y = rand() % (GRID_HEIGHT - 1);
+						if (maze[XYToIndex(x,y)] && x != 0 && y != 0 && x != GRID_WIDTH - 1 && y != GRID_HEIGHT - 1)
+						{
+							maze[XYToIndex(x,y)] = 0;
+							break;
+						}
+					}		
+				}
+				break;
+			}
+		case 3:
+			{
+				FOR(i,0,17)
+				{
+					while (1)
+					{
+						x = rand() % (GRID_WIDTH - 1);
+						y = rand() % (GRID_HEIGHT - 1);
+						if (maze[XYToIndex(x,y)] && x != 0 && y != 0 && x != GRID_WIDTH - 1 && y != GRID_HEIGHT - 1)
+						{
+							maze[XYToIndex(x,y)] = 0;
+							break;
+						}
+					}		
+				}
+				break;
+			}
+
+	}
+}
 void loser()
 {
 	TextColor(14);
@@ -246,7 +334,6 @@ void xep_hang(int c)
 	_getch();
 	menu();
 }
-
 void veKhung()
 {
 	TextColor(14);
@@ -284,7 +371,7 @@ void saveGame()
 		case 2: lv = "mazelv2.txt"; break;
 		case 3: lv = "mazelv3.txt"; break;
 	}
-	string username;
+	char username[10];
 
 	veKhung();
 
@@ -296,10 +383,11 @@ void saveGame()
 	cout << "Nhap ten nguoi choi";
 	gotoxy(40, 22);
 	cout << ">> ";
-	getline(cin, username);
-
+	//getline(cin, username);
+	FOR(i,0,9) cin >> username[i];
 	ofstream f(lv, ios::app);
-	f << username << ":" << final_time << endl;
+	FOR(i,0,9) f << username[i];
+	f << ":" << final_time << endl;
 	f.close();
 }
 
@@ -308,8 +396,31 @@ void huong_dan()
 	system("cls");
 	GRID_WIDTH = 35;
 	GRID_HEIGHT = 17;
-	genmaze();
 
+	FOR(i, 0, GRID_WIDTH * GRID_HEIGHT - 1) maze[i] = true;
+	Visit(1, 1);	
+	TextColor(2);
+	FOR(i, 0, GRID_HEIGHT - 1)
+	{
+		FOR (j, 0, GRID_WIDTH - 1)
+		{
+			if (maze[XYToIndex(j, i)])
+			{
+				maze2D[i][j] = 1;
+				cout << char(219);
+			}
+			else
+			{
+				maze2D[i][j] = 0;
+				cout << " ";
+			}
+		}
+		cout << endl;
+	}
+	gotoxy(1,1);
+	printf("X");
+	gotoxy(GRID_WIDTH - 2, GRID_HEIGHT - 2);
+	printf("$");
 	veKhung();
 
 	TextColor(13);
@@ -446,6 +557,8 @@ void showInfo(int level)
 	cout << "BUOC GIAI TOI UU";
 	gotoxy(93, 19);
 	cout << demWay - 1;
+	gotoxy(89, 21);
+	cout << "SO CACH GIAI";
 	TextColor(14);
 	gotoxy(88, 24);
 	cout << "CACH DI CHUYEN";
@@ -475,6 +588,10 @@ void showStep()
 
 void showTime()
 {	
+	TextColor(15);
+	gotoxy(93, 22);
+	cout << ways;
+
 	// hiện thời gian 
 	clock_t end = clock();
 	temp_time = double(end - start) / cps;
@@ -499,14 +616,22 @@ void bye()
 // Duong di toi uu
 void autoMove()
 {
+    TextColor(12);
+    FOR(i, 1, user_step)
+    {
+        gotoxy(way_user[i][1], way_user[i][0]);
+        cout << char(219);
+        Sleep(10);
+    }
     TextColor(14);
-    gotoxy(0, 1);
-    FOR(i, 0, demWay - 1)
+    gotoxy(1, 1);
+    FOR(i, 0, demWay)
     {
         gotoxy(way[i][1] - 1, way[i][0] - 1);
         cout << char(219);
         Sleep(10);
     }
+
 }
 
 int XYToIndex(int x, int y)
@@ -531,6 +656,9 @@ void genmaze()
 	FOR(i, 0, GRID_WIDTH * GRID_HEIGHT - 1) maze[i] = true;
 
 	Visit(1, 1);
+
+	ducMaze(capdo);
+	
 	TextColor(2);
 	FOR(i, 0, GRID_HEIGHT - 1)
 	{
@@ -647,10 +775,10 @@ void play(int level)
 	capdo = level; // luu lai level de su dung cho ham savegame
 
 	gotoxy(0,0);
-	start = clock(); // tính điểm mốc thời gian bắt đầu chơi
 	system("cls");
 	user_step = 0;
 	genmaze();
+	start = clock(); // tính điểm mốc thời gian bắt đầu chơi
 	showInfo(level);
 	moveCharacter();
 }
@@ -995,6 +1123,8 @@ void moveCharacter()
 						gotoxy(x, y);
 						user_step++;
 						showStep();
+						way_user[user_step][1] = x;
+						way_user[user_step][0] = y;
 					}
 					break;
 
@@ -1009,6 +1139,8 @@ void moveCharacter()
 						gotoxy(x, y);
 						user_step++;
 						showStep();
+						way_user[user_step][1] = x;
+						way_user[user_step][0] = y;						
 					}
 					break;
 
@@ -1023,6 +1155,8 @@ void moveCharacter()
 						gotoxy(x, y);
 						user_step++;
 						showStep();
+						way_user[user_step][1] = x;
+						way_user[user_step][0] = y;						
 					}
 					break;
 
@@ -1037,6 +1171,8 @@ void moveCharacter()
 						gotoxy(x, y);
 						user_step++;
 						showStep();
+						way_user[user_step][1] = x;
+						way_user[user_step][0] = y;
 					}
 					break;
 				case 13: // auto move giữa chừng
